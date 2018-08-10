@@ -1,0 +1,39 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+	config.vm.box = "timveil/centos7-hdp-base"
+	config.vm.box_check_update = true
+
+	config.vm.hostname = "hadoop3"
+
+	config.vbguest.auto_update = true
+  config.vbguest.no_remote = false
+  config.vbguest.no_install = false
+
+	config.vm.network "private_network", type: "dhcp"
+
+	config.vm.define "hadoop3"
+	config.vm.provider "virtualbox" do |vb|
+		vb.gui = true
+		vb.cpus = 4
+		vb.name = "hadoop3"
+		vb.memory = "8192"
+	end
+
+	if Vagrant.has_plugin?("vagrant-proxyconf")
+	  config.proxy.http     = ""
+	  config.proxy.https    = ""
+	  config.proxy.no_proxy = ""
+	end
+
+	 config.vm.provision :shell, :inline  => '
+	 sudo yum install epel-release -y
+	 sudo yum -y update
+	 sudo yum install -y java-1.8.0-openjdk mc vim
+
+	 cd /tmp
+	 wget http://apache.mindstudios.com/hadoop/common/hadoop-3.0.0/hadoop-3.0.0.tar.gz
+	 sudo tar -zxvf hadoop-3.0.0.tar.gz -C /opt
+	 '
+end
